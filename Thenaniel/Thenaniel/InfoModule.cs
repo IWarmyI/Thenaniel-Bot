@@ -1,4 +1,4 @@
-﻿using System;
+﻿	using System;
 using System.Threading.Tasks;
 
 using Discord.WebSocket;
@@ -8,46 +8,44 @@ namespace Thenaniel
 {
 	public class InfoModule : ModuleBase<SocketCommandContext>
 	{
-		// ~say hello world -> hello world
-		[Command("say")]
-		[Summary("Echoes a message.")]
-		public Task SayAsync([Remainder][Summary("The text to echo")] string echo)
-			=> ReplyAsync(echo);
+		[Command("n8ball")]
+		[Summary("Ask the Magic 8 Ball")]
+		public Task EightBall([Remainder][Summary("Ask the Magic 8 Ball")] string question)
+		{
+			// randomly select response
+			Random magicBall = new Random();
 
-		// ReplyAsync is a method on ModuleBase 
+			int num = magicBall.Next(0, 10);
+
+			string[] response =
+			{
+				"```Definitely...Not```",
+				"```Maybe```",
+				"```God No```",
+				"```Sure```",
+				"```Go For It Champ```",
+				"```Ask Again Later```",
+				"```I Doubt It```",
+				"```Why Not```",
+				"```Yes```",
+				"```Most Likely```",
+			};
+
+			return ReplyAsync(response[num]);
+		}
 	}
 
-	// Create a module with the 'sample' prefix
-	[Group("sample")]
-	public class SampleModule : ModuleBase<SocketCommandContext>
+	// Commands related to league
+	[Group("lol")]
+	public class LeagueModule : ModuleBase<SocketCommandContext>
 	{
-		// ~sample square 20 -> 400
-		[Command("square")]
-		[Summary("Squares a number.")]
-		public async Task SquareAsync(
-			[Summary("The number to square.")]
-		int num)
-		{
-			// We can also access the channel from the Command Context.
-			await Context.Channel.SendMessageAsync($"{num}^2 = {Math.Pow(num, 2)}");
-		}
+		
+	}
 
-		// ~sample userinfo --> foxbot#0282
-		// ~sample userinfo @Khionu --> Khionu#8708
-		// ~sample userinfo Khionu#8708 --> Khionu#8708
-		// ~sample userinfo Khionu --> Khionu#8708
-		// ~sample userinfo 96642168176807936 --> Khionu#8708
-		// ~sample whois 96642168176807936 --> Khionu#8708
-		[Command("userinfo")]
-		[Summary
-		("Returns info about the current user, or the user parameter, if one passed.")]
-		[Alias("user", "whois")]
-		public async Task UserInfoAsync(
-			[Summary("The (optional) user to get info from")]
-		SocketUser user = null)
-		{
-			var userInfo = user ?? Context.Client.CurrentUser;
-			await ReplyAsync($"{userInfo.Username}#{userInfo.Discriminator}");
-		}
+	// Commands related to osu
+	[Group("osu")]
+	public class OsuModule : ModuleBase<SocketCommandContext>
+	{
+
 	}
 }
