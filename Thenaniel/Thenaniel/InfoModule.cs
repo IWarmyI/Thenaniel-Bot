@@ -8,7 +8,7 @@ namespace Thenaniel
 {
 	public class InfoModule : ModuleBase<SocketCommandContext>
 	{
-		[Command("n8ball")]
+		[Command("8ball")]
 		[Summary("Ask the Magic 8 Ball")]
 		public Task EightBall([Remainder][Summary("Ask the Magic 8 Ball")] string question)
 		{
