@@ -7,9 +7,9 @@ namespace Thenaniel
 {
 	public class InfoModule : ModuleBase<SocketCommandContext>
 	{
-		[Command("8ball")]
+		[Command("ball")]
 		[Summary("Ask the Magic 8 Ball")]
-		public Task EightBall([Remainder][Summary("Ask the Magic 8 Ball")] string question)
+		public Task EightBall([Remainder][Summary("Ask the Magic 8 Ball")] string question = "")
 		{
 			// randomly select response
 			Random magicBall = new Random();
@@ -18,7 +18,7 @@ namespace Thenaniel
 
 			string[] response =
 			{
-				"```Definitely...Not```",
+				"```Definitely Not```",
 				"```Maybe```",
 				"```God No```",
 				"```Sure```",
