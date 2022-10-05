@@ -46,19 +46,19 @@ public class CommandHandler
         int argPos = 0;
 
         // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-        if (!(message.HasCharPrefix(config.GetValue<char>("DiscordConfig:prefix"), ref argPos) ||
-            message.HasMentionPrefix(client.CurrentUser, ref argPos)) ||
+        if (message.HasCharPrefix(config.GetValue<char>("DiscordConfig:prefix"), ref argPos) ||
+            message.HasMentionPrefix(client.CurrentUser, ref argPos) ||
             message.Author.IsBot)
-            return;
+        {
+            // Create a WebSocket-based command context based on the message
+            var context = new SocketCommandContext(client, message);
 
-        // Create a WebSocket-based command context based on the message
-        var context = new SocketCommandContext(client, message);
-
-        // Execute the command with the command context we just
-        // created, along with the service provider for precondition checks.
-        await commands.ExecuteAsync(
-            context: context,
-            argPos: argPos,
-            services: null);
+            // Execute the command with the command context we just
+            // created, along with the service provider for precondition checks.
+            await commands.ExecuteAsync(
+                context: context,
+                argPos: argPos,
+                services: null);
+        }
     }
 }
