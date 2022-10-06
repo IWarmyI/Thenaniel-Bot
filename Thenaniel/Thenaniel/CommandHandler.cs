@@ -1,71 +1,76 @@
-﻿using System.Threading.Tasks;
-using System.Reflection;
-
-using Microsoft.Extensions.Configuration;
-
-using Discord.WebSocket;
+﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 public class CommandHandler
 {
     private readonly DiscordSocketClient client;
     private readonly CommandService commands;
-    private readonly IConfigurationRoot config;
+    private readonly IServiceProvider services;
 
     // Retrieve client and CommandService instance
-    public CommandHandler(DiscordSocketClient _client, CommandService _commands, IConfigurationRoot _config)
+    public CommandHandler(IServiceProvider _services)
     {
-        client = _client;
-        commands = _commands;
-        config = _config;
+        client = _services.GetRequiredService<DiscordSocketClient>();
+        commands = _services.GetRequiredService<CommandService>();
+        services = _services;
+
+        // Hook CommandExecuted to handle post-command-execution logic.
+        commands.CommandExecuted += CommandExecutedAsync;
+        // Hook MessageReceived so we can process each message to see
+        // if it qualifies as a command.
+        client.MessageReceived += MessageReceivedAsync;
+    }
+    public async Task InitializeAsync()
+    {
+        // Register modules that are public and inherit ModuleBase<T>.
+        await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
     }
 
-    public async Task InstallCommandsAsync()
+    public async Task MessageReceivedAsync(SocketMessage rawMessage)
     {
-        // Hook the MessageReceived event into our command handler
-        client.MessageReceived += HandleCommandAsync;
+        // Ignore system messages, or messages from other bots
+        if (!(rawMessage is SocketUserMessage message))
+            return;
+        if (message.Source != MessageSource.User)
+            return;
 
-        // Here we discover all of the command modules in the entry 
-        // assembly and load them. Starting from Discord.NET 2.0, a
-        // service provider is required to be passed into the
-        // module registration method to inject the 
-        // required dependencies.
-        //
-        // If you do not use Dependency Injection, pass null.
-        // See Dependency Injection guide for more information.
-        await commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
-    }
-
-    private async Task HandleCommandAsync(SocketMessage messageParam)
-    {
-        // Don't process the command if it was a system message
-        SocketUserMessage message = messageParam as SocketUserMessage;
-        if (message == null) return;
-
-        // Create a number to track where the prefix ends and the command begins
-        int argPos = 0;
-
-        var prefix = config.GetValue<char>("DiscordConfig:prefix");
-
-        if (message.HasCharPrefix(prefix, ref argPos))
+        // This value holds the offset where the prefix ends
+        var argPos = 0;
+        // Perform prefix check. You may want to replace this with
+        // (!message.HasCharPrefix('!', ref argPos))
+        // for a more traditional command format like !help.
+        if (!message.HasMentionPrefix(client.CurrentUser, ref argPos))
         {
+            Console.WriteLine(message.Content);
+
             return;
         }
+        var context = new SocketCommandContext(client, message);
+        // Perform the execution of the command. In this method,
+        // the command service will perform precondition and parsing check
+        // then execute the command if one is matched.
+        await commands.ExecuteAsync(context, argPos, services);
+        // Note that normally a result will be returned by this format, but here
+        // we will handle the result in CommandExecutedAsync,
+    }
 
-        // Determine if the message is a command based on the prefix and make sure no bots trigger commands
-        if (message.HasCharPrefix(config.GetValue<char>("DiscordConfig:prefix"), ref argPos) ||
-            message.HasMentionPrefix(client.CurrentUser, ref argPos) ||
-            message.Author.IsBot)
-        {
-            // Create a WebSocket-based command context based on the message
-            var context = new SocketCommandContext(client, message);
+    public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+    {
+        // command is unspecified when there was a search failure (command not found); we don't care about these errors
+        if (!command.IsSpecified)
+            return;
 
-            // Execute the command with the command context we just
-            // created, along with the service provider for precondition checks.
-            await commands.ExecuteAsync(
-                context: context,
-                argPos: argPos,
-                services: null);
-        }
+        // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
+        if (result.IsSuccess)
+            return;
+
+        // the command failed, let's notify the user that something happened.
+        await context.Channel.SendMessageAsync($"error: {result}");
     }
 }

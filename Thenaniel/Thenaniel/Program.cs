@@ -1,52 +1,66 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-
-using Microsoft.Extensions.Configuration;
-
-using Discord;
-using Discord.WebSocket;
+﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Thenaniel
 {
 	public class Program
 	{
-		//client
-		private static DiscordSocketClient client;
-		//command service
-		private static CommandService commands;
-		//command handler
-		private CommandHandler handler;
+        static void Main(string[] args)
+           => new Program().MainAsync().GetAwaiter().GetResult();
 
-		public static Task Main(string[] args) => new Program().MainAsync();
+        public async Task MainAsync()
+        {
+            // You should dispose a service provider created using ASP.NET
+            // when you are finished using it, at the end of your app's lifetime.
+            // If you use another dependency injection framework, you should inspect
+            // its documentation for the best way to do this.
+            using (var services = ConfigureServices())
+            {
+                var client = services.GetRequiredService<DiscordSocketClient>();
 
-		public async Task MainAsync()
-		{
-			//link client logs
-			client = new DiscordSocketClient();
-			client.Log += Log;
+                client.Log += Log;
+                services.GetRequiredService<CommandService>().Log += Log;
 
-			//get config
-			var config = new ConfigurationBuilder()
-				.SetBasePath(AppContext.BaseDirectory)
-				.AddJsonFile("config.json").Build();
+                // get config
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(AppContext.BaseDirectory)
+                    .AddJsonFile("config.json").Build();
 
-			commands = new CommandService();
+                // Tokens should be considered secret data and never hard-coded.
+                // We can read from the environment variable to avoid hard coding.
+                await client.LoginAsync(TokenType.Bot, config.GetValue<string>("DiscordConfig:token"));
+                await client.StartAsync();
 
-			handler = new CommandHandler(client, commands, config);
-			await handler.InstallCommandsAsync();
+                // Here we initialize the logic required to register our commands.
+                await services.GetRequiredService<CommandHandler>().InitializeAsync();
 
-			await client.LoginAsync(TokenType.Bot, config.GetValue<string>("DiscordConfig:token"));
-			await client.StartAsync();
+                await Task.Delay(Timeout.Infinite);
+            }
+        }
 
-			await Task.Delay(-1);
-		}
-
-		private Task Log(LogMessage msg)
+        private Task Log(LogMessage msg)
 		{
 			Console.WriteLine(msg.ToString());
 			return Task.CompletedTask;
 		}
-	}
+
+        private ServiceProvider ConfigureServices()
+        {
+            return new ServiceCollection()
+                .AddSingleton(new DiscordSocketConfig
+                {
+                    GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+                })
+                .AddSingleton<DiscordSocketClient>()
+                .AddSingleton<CommandService>()
+                .AddSingleton<CommandHandler>()
+                .BuildServiceProvider();
+        }
+    }
 }

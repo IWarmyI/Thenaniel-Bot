@@ -7,9 +7,9 @@ namespace Thenaniel
 {
 	public class InfoModule : ModuleBase<SocketCommandContext>
 	{
-		[Command("ball")]
+		[Command("ask")]
 		[Summary("Ask the Magic 8 Ball")]
-		public Task EightBall([Remainder][Summary("Ask the Magic 8 Ball")] string question = "")
+		public async Task AskAsync()
 		{
 			// randomly select response
 			Random magicBall = new Random();
@@ -30,7 +30,7 @@ namespace Thenaniel
 				"```Most Likely```",
 			};
 
-			return ReplyAsync(response[num]);
+		await ReplyAsync(response[num]);
 		}
 	}
 
