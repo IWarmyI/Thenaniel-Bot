@@ -28,17 +28,19 @@ namespace Thenaniel
                 client.Log += Log;
                 services.GetRequiredService<CommandService>().Log += Log;
 
+                // parse config.json into dictionary
                 var config = new ConfigurationBuilder()
                             .SetBasePath(Directory.GetCurrentDirectory())
                             .AddJsonFile("config.json", true)
-                            .AddEnvironmentVariables()
                             .Build();
+                
+                // set into environment variables
+                Environment.SetEnvironmentVariable("TOKEN", config.GetValue<string>("token"));
+                Environment.SetEnvironmentVariable("PREFIX", config.GetValue<string>("prefix"));
+                Environment.SetEnvironmentVariable("APPID", config.GetValue<string>("app_id"));
+                Environment.SetEnvironmentVariable("APPSECRET", config.GetValue<string>("app_secret"));
 
-                string token = Environment.GetEnvironmentVariable("TOKEN");
-                //Environment.SetEnvironmentVariable(token, "DiscordConfig:token");
-
-                // Tokens should be considered secret data and never hard-coded.
-                // We can read from the environment variable to avoid hard coding.
+                // login client
                 await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("TOKEN"));
                 await client.StartAsync();
 

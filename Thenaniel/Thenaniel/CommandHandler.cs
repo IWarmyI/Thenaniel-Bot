@@ -40,12 +40,11 @@ public class CommandHandler
         if (message.Source != MessageSource.User)
             return;
 
+        char[] prefix = Environment.GetEnvironmentVariable("PREFIX").ToCharArray();
+
         // This value holds the offset where the prefix ends
         var argPos = 0;
-        // Perform prefix check. You may want to replace this with
-        // (!message.HasCharPrefix('!', ref argPos))
-        // for a more traditional command format like !help.
-        if (!message.HasMentionPrefix(client.CurrentUser, ref argPos))
+        if (!message.HasCharPrefix(prefix[0], ref argPos))
         {
             Console.WriteLine(message.Content);
             return;
