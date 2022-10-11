@@ -48,7 +48,6 @@ public class CommandHandler
         if (!message.HasMentionPrefix(client.CurrentUser, ref argPos))
         {
             Console.WriteLine(message.Content);
-
             return;
         }
         var context = new SocketCommandContext(client, message);

@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,14 +28,18 @@ namespace Thenaniel
                 client.Log += Log;
                 services.GetRequiredService<CommandService>().Log += Log;
 
-                // get config
                 var config = new ConfigurationBuilder()
-                    .SetBasePath(AppContext.BaseDirectory)
-                    .AddJsonFile("config.json").Build();
+                            .SetBasePath(Directory.GetCurrentDirectory())
+                            .AddJsonFile("config.json", true)
+                            .AddEnvironmentVariables()
+                            .Build();
+
+                string token = Environment.GetEnvironmentVariable("TOKEN");
+                //Environment.SetEnvironmentVariable(token, "DiscordConfig:token");
 
                 // Tokens should be considered secret data and never hard-coded.
                 // We can read from the environment variable to avoid hard coding.
-                await client.LoginAsync(TokenType.Bot, config.GetValue<string>("DiscordConfig:token"));
+                await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("TOKEN"));
                 await client.StartAsync();
 
                 // Here we initialize the logic required to register our commands.
@@ -53,10 +58,10 @@ namespace Thenaniel
         private ServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
-                .AddSingleton(new DiscordSocketConfig
-                {
-                    GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
-                })
+                 .AddSingleton(new DiscordSocketConfig
+                 {
+                     GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent
+                 })
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
