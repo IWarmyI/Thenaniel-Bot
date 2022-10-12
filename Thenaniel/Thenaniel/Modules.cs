@@ -5,7 +5,7 @@ using Discord.Commands;
 
 namespace Thenaniel
 {
-	public class SayModule : ModuleBase<SocketCommandContext>
+	public class CommandModule : ModuleBase<SocketCommandContext>
 	{
         [Command("8ball")]
         [Summary("Ask the Magic 8 Ball")]
