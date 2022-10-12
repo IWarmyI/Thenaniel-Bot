@@ -40,7 +40,7 @@ public class CommandHandler
         if (message.Source != MessageSource.User)
             return;
 
-        char[] prefix = Environment.GetEnvironmentVariable("PREFIX").ToCharArray();
+        char[] prefix = Environment.GetEnvironmentVariable("DISCORD_PREFIX").ToCharArray();
 
         // This value holds the offset where the prefix ends
         var argPos = 0;

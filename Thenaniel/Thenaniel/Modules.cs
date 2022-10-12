@@ -7,7 +7,7 @@ namespace Thenaniel
 {
 	public class SayModule : ModuleBase<SocketCommandContext>
 	{
-        [Command("ask")]
+        [Command("8ball")]
         [Summary("Ask the Magic 8 Ball")]
         public async Task AskAsync([Remainder] string question)
         {

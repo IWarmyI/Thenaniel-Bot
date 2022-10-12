@@ -35,13 +35,11 @@ namespace Thenaniel
                             .Build();
                 
                 // set into environment variables
-                Environment.SetEnvironmentVariable("TOKEN", config.GetValue<string>("token"));
-                Environment.SetEnvironmentVariable("PREFIX", config.GetValue<string>("prefix"));
-                Environment.SetEnvironmentVariable("APPID", config.GetValue<string>("app_id"));
-                Environment.SetEnvironmentVariable("APPSECRET", config.GetValue<string>("app_secret"));
+                Environment.SetEnvironmentVariable("DISCORD_TOKEN", config.GetValue<string>("discord:token"));
+                Environment.SetEnvironmentVariable("DISCORD_PREFIX", config.GetValue<string>("discord:prefix"));
 
                 // login client
-                await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("TOKEN"));
+                await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_TOKEN"));
                 await client.StartAsync();
 
                 // Here we initialize the logic required to register our commands.
