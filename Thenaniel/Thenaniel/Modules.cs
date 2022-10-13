@@ -71,7 +71,7 @@ namespace Thenaniel
                           "\nPlay Count: " + playCount +
                           "\nTime Played: " + timePlayed + " hours```";
 
-            ReplyAsync(data);
+            await ReplyAsync(data);
         }
     }
 }
