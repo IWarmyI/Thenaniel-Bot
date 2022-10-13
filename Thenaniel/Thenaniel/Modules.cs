@@ -1,13 +1,10 @@
-﻿using System;
+﻿using Discord.Commands;
+using OsuNet;
+using OsuNet.Models;
+using OsuNet.Models.Options;
+
+using System;
 using System.Threading.Tasks;
-
-using OsuSharp;
-
-using Discord.Commands;
-using OsuSharp.Domain;
-using OsuSharp.Interfaces;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace Thenaniel
 {
@@ -51,43 +48,30 @@ namespace Thenaniel
 	[Group("osu")]
 	public class OsuModule : ModuleBase<SocketCommandContext>
 	{
-        private IOsuClient client;
+        private static readonly OsuApi api = new OsuApi(Environment.GetEnvironmentVariable("OSU_API"));
 
-        public OsuModule (IOsuClient _client)
+        [Command("user")]
+        [Alias("u")]
+        [Summary("Get user info")]
+        public async Task GetUser([Remainder] string username)
         {
-            client = _client;
-        }
+            User[] user = api.GetUser(new GetUserOptions() { User = username });
 
-        [Command("recent")]
-        [Alias("r")]
-        [Summary("Get user's most recent play")]
-        public async Task Recent([Remainder] string username)
-        {
-            await Recent(1, username);
-        }
+            ulong rankGlobal = user[0].PPRank;
+            ulong rankCountry = user[0].PPCountryRank;
+            ulong playCount = user[0].PlayCount;
+            ulong timePlayed = user[0].TotalSecondsPlayed;
 
-        [Command("recent")]
-        [Alias("r")]
-        [Summary("Get user's most recent play")]
-        public async Task Recent(int count, [Remainder] string username)
-        {
-            if (string.IsNullOrEmpty(username))
-            {
-                await ReplyAsync("Username is null/empty, command usage is \"a.recent <count=1> [username]\"");
-                return;
-            }
-            var user = await client.GetUserByNameAsync(username);
-            if (user == null) return;
-            var recentScores = await client.GetUserRecentAndBeatmapByUsernameAsync(username, limit: 1);
-            if (recentScores.Count < 1) return;
-            if (count == 1)
-            {
-                await ReplyAsync($"**Most recent play for {user.Username}:**", embed: CreateSinglePlayEmbed(user, recentScores[0].UserRecent, recentScores[0].Beatmap));
-            }
-            else
-            {
-                await ReplyAsync($"**Most recent plays for {user.Username}:**", embed: CreateMultiplePlayEmbed(user, recentScores));
-            }
+            timePlayed /= 60;
+            timePlayed /= 60;
+
+            string data = username +
+                          "\n```Global Rank: " + rankGlobal +
+                          "\nCountry Rank: " + rankCountry +
+                          "\nPlay Count: " + playCount +
+                          "\nTime Played: " + timePlayed + " hours```";
+
+            ReplyAsync(data);
         }
     }
 }

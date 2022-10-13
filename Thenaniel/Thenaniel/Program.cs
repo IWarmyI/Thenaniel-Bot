@@ -2,9 +2,6 @@
 using Discord.Commands;
 using Discord.WebSocket;
 
-using OsuSharp;
-using OsuSharp.Extensions;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,19 +30,11 @@ namespace Thenaniel
             // set into environment variables
             Environment.SetEnvironmentVariable("DISCORD_TOKEN", config.GetValue<string>("discord:token"));
             Environment.SetEnvironmentVariable("DISCORD_PREFIX", config.GetValue<string>("discord:prefix"));
+            // osu api v2
             Environment.SetEnvironmentVariable("OSU_ID", config.GetValue<string>("osu:id"));
             Environment.SetEnvironmentVariable("OSU_SECRET", config.GetValue<string>("osu:secret"));
-
-            // osu start
-            Host.CreateDefaultBuilder(args)
-                .ConfigureOsuSharp((ctx, options) => options.Configuration = new OsuClientConfiguration
-                {
-                    ClientId = long.Parse(Environment.GetEnvironmentVariable("OSU_ID")),
-                    ClientSecret = Environment.GetEnvironmentVariable("OSU_SECRET")
-                })
-                .ConfigureServices((ctx, services) => services.AddSingleton<OsuModule>())
-                .Build()
-                .Run();
+            // osu api v1
+            Environment.SetEnvironmentVariable("OSU_API", config.GetValue<string>("osu:api"));
 
             // discord start
             new Program().MainAsync().GetAwaiter().GetResult();

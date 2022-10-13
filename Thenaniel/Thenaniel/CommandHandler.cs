@@ -2,7 +2,6 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using OsuSharp.Interfaces;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -13,7 +12,6 @@ public class CommandHandler
     private readonly DiscordSocketClient discordClient;
     private readonly CommandService commands;
     private readonly IServiceProvider services;
-    private readonly IOsuClient osuClient;
 
     // Retrieve client and CommandService instance
     public CommandHandler(IServiceProvider _services)
@@ -21,7 +19,6 @@ public class CommandHandler
         discordClient = _services.GetRequiredService<DiscordSocketClient>();
         commands = _services.GetRequiredService<CommandService>();
         services = _services;
-        osuClient = _services.GetRequiredService<IOsuClient>();
 
         // Hook CommandExecuted to handle post-command-execution logic.
         commands.CommandExecuted += CommandExecutedAsync;
