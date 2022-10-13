@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using OsuSharp.Interfaces;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -9,22 +10,24 @@ using System.Windows.Input;
 
 public class CommandHandler
 {
-    private readonly DiscordSocketClient client;
+    private readonly DiscordSocketClient discordClient;
     private readonly CommandService commands;
     private readonly IServiceProvider services;
+    private readonly IOsuClient osuClient;
 
     // Retrieve client and CommandService instance
     public CommandHandler(IServiceProvider _services)
     {
-        client = _services.GetRequiredService<DiscordSocketClient>();
+        discordClient = _services.GetRequiredService<DiscordSocketClient>();
         commands = _services.GetRequiredService<CommandService>();
         services = _services;
+        osuClient = _services.GetRequiredService<IOsuClient>();
 
         // Hook CommandExecuted to handle post-command-execution logic.
         commands.CommandExecuted += CommandExecutedAsync;
         // Hook MessageReceived so we can process each message to see
         // if it qualifies as a command.
-        client.MessageReceived += MessageReceivedAsync;
+        discordClient.MessageReceived += MessageReceivedAsync;
     }
     public async Task InitializeAsync()
     {
@@ -49,7 +52,7 @@ public class CommandHandler
             Console.WriteLine(message.Content);
             return;
         }
-        var context = new SocketCommandContext(client, message);
+        var context = new SocketCommandContext(discordClient, message);
         // Perform the execution of the command. In this method,
         // the command service will perform precondition and parsing check
         // then execute the command if one is matched.
