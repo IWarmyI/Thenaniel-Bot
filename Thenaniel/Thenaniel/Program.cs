@@ -11,14 +11,13 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
+using System.Collections.Generic;
 
 namespace Thenaniel
 {
 	public class Program
 	{
-        private static readonly HttpClient osuAPI = new HttpClient();
-        const string URL = "https://osu.ppy.sh/api/v2/";
-
+        private static Dictionary<string, string> osuUsers = new Dictionary<string, string>();
         static void Main(string[] args)
         {
             // parse config.json into dictionary
@@ -79,6 +78,7 @@ namespace Thenaniel
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandler>()
+                .AddSingleton(new DictionaryStorage(osuUsers))
                 .BuildServiceProvider();
         }
     }
