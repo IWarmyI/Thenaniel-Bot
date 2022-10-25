@@ -13,6 +13,7 @@ namespace Thenaniel
 {
     // Commands related to osu
     [Group("osu")]
+    [Alias("o")]
     public class OsuModule : ModuleBase<SocketCommandContext>
     {
         private static readonly OsuApi api = new OsuApi(Environment.GetEnvironmentVariable("OSU_API"));
