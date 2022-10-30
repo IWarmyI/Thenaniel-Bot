@@ -55,15 +55,16 @@ namespace Thenaniel
         [Summary("Display All Available Commands")]
         public async Task AllCommands()
         {
-            await ReplyAsync("```General (No Prefix):\n" + 
+            await ReplyAsync("```General Commands:\n" + 
                              "(h)elp\t\tShow all available commands and their short-hands\n" +
                              "(p)refix\t\tChange bot\'s prefix\n" +
                              "(8b)all\t\tAsk a question and get a randomized response\n\n" + 
 
-                             "Osu! (Use \"(o)su\" along with your command):\n" + 
+                             "Osu! Commands (Use \"(o)su\" along with your command):\n" + 
                              "(a)dd\t\tAdd an Osu! profile (You can only have one at a time)\n" + 
                              "(d)elete\t\tRemove the connection between your Osu! profile and Discord\n" + 
-                             "(u)ser\t\tGet stats of your Osu! profile```");
+                             "(u)ser\t\tGet stats of your Osu! profile\n\n" +
+                             "More to Come!```");
         }
     }
 
